@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Планировщик смен - дизайн-основа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#f6f7f9;--surface:#fff;--sunken:#f0f2f5;--ink:#17202b;--ink-2:#46515e;--ink-3:#6b7682;--line:#e3e7ec;--line-2:#d3d9e0;
+ --brand:#2457d6;--brand-bg:#e8eefc;
+ --ok:#1f8a4c;--ok-bg:#e3f4ea;--warn:#a86200;--warn-bg:#fdf0dc;--err:#c8322b;--err-bg:#fde7e6;
+ --r-kitchen:#7c4dcc;--r-hall:#2470c9;--r-bar:#c2571a;--r-admin:#3f7d5a;
+ --row:40px;--fs:13px;--pad:8px}
+body.comfy{--row:52px;--fs:14px;--pad:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Arial,sans-serif;font-size:var(--fs);background:var(--bg);color:var(--ink);line-height:1.4}
+.num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{display:none}}
+.side{background:#121a24;color:#c6cfd9;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.side .logo{color:#fff;font-weight:700;font-size:15px;padding:6px 10px 16px}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;text-decoration:none;color:inherit;font-size:13px}
+.side a.on{background:#24364d;color:#fff}
+.side a:hover{background:#1c2a3a}
+.side .sec{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#7d8a98;padding:14px 10px 6px}
+.main{display:flex;flex-direction:column;min-width:0}
+.top{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.top h1{font-size:18px;font-weight:700;margin-right:auto}
+.crumb{color:var(--ink-3);font-size:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface);font:500 13px Inter;color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--sunken)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:0 10px;height:30px;font:500 12px Inter;color:var(--ink-2);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--brand-bg);color:var(--brand)}
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.toolbar .sp{flex:1}
+.search{height:32px;border:1px solid var(--line-2);border-radius:6px;padding:0 10px;font:13px Inter;width:200px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:13px;background:var(--sunken);font-size:12px;color:var(--ink-2);border:1px solid transparent;cursor:pointer}
+.chip.on{background:var(--brand-bg);color:var(--brand);border-color:#c4d3f6}
+.dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px 20px}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi span{color:var(--ink-3);font-size:12px}
+.kpi b{display:block;font-size:20px;font-weight:600;margin-top:2px}
+.kpi small{font-size:12px}
+.up{color:var(--ok)}.down{color:var(--err)}
+.wrapgrid{padding:0 20px 20px;overflow:auto}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:980px;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{height:var(--row);border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0 var(--pad);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--sunken);font-weight:600;font-size:12px;color:var(--ink-2);z-index:2}
+th.today{color:var(--brand);box-shadow:inset 0 -2px var(--brand)}
+td.emp{position:sticky;left:0;background:var(--surface);z-index:1;min-width:210px}
+.emp b{display:block;font-weight:600}
+.emp span{color:var(--ink-3);font-size:12px}
+.emp .h{float:right;color:var(--ink-3);font-size:12px;margin-top:2px}
+.emp .h.over{color:var(--err);font-weight:600}
+tr:hover td{background:#fafbfd}
+tr.group td{background:var(--sunken);height:30px;font-weight:600;font-size:12px;color:var(--ink-2)}
+td.cell{padding:4px;min-width:104px;position:relative;cursor:pointer}
+.sh{display:flex;flex-direction:column;justify-content:center;height:100%;border-radius:5px;padding:0 8px;border-left:3px solid var(--rc);background:color-mix(in srgb,var(--rc) 9%,#fff);transition:box-shadow .15s}
+.sh:hover{box-shadow:0 0 0 1px var(--rc)}
+.sh .t{font-weight:600;font-size:12px}
+.sh .p{font-size:11px;color:var(--ink-3)}
+body:not(.comfy) .sh .p{display:none}
+.sh.conf{background:var(--err-bg);border-left-color:var(--err)}
+.sh.conf::after{content:"!";position:absolute;right:8px;top:8px;width:16px;height:16px;border-radius:50%;background:var(--err);color:#fff;font:700 11px/16px Inter;text-align:center}
+.off{height:100%;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px;border-radius:5px;background:repeating-linear-gradient(-45deg,var(--sunken) 0 5px,#fff 5px 10px)}
+.add{height:100%;border:1px dashed transparent;border-radius:5px;display:grid;place-items:center;color:transparent}
+td.cell:hover .add{border-color:var(--line-2);color:var(--ink-3)}
+tr.cov td{background:#fbfcfd;font-size:12px}
+.cov .bar{display:flex;align-items:center;gap:6px}
+.cov .bar i{display:block;height:6px;border-radius:3px;flex:1;background:var(--sunken);position:relative;overflow:hidden}
+.cov .bar i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--c)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink-3);font-size:12px;padding:0 20px 30px}
+/* аудит */
+.pin{position:absolute;width:22px;height:22px;border-radius:50%;background:#e8590c;color:#fff;font:700 12px/22px Inter;text-align:center;box-shadow:0 0 0 4px rgba(232,89,12,.25);z-index:20;display:none;cursor:help}
+body.audit .pin{display:block}
+.audit-panel{position:fixed;right:16px;bottom:16px;width:min(380px,92vw);max-height:70vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 20px 50px rgba(15,25,40,.18);z-index:50;display:none}
+body.audit .audit-panel{display:block}
+.audit-panel h3{font-size:14px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+.audit-panel ol{list-style:none;padding:6px 0}
+.audit-panel li{display:flex;gap:10px;padding:10px 16px;font-size:13px;color:var(--ink-2)}
+.audit-panel li b{color:var(--ink);display:block;margin-bottom:2px}
+.audit-panel li i{flex:none;width:22px;height:22px;border-radius:50%;background:#e8590c;color:#fff;font:700 12px/22px Inter;text-align:center;font-style:normal}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,92vw);background:#fff;border-left:1px solid var(--line);box-shadow:-20px 0 50px rgba(15,25,40,.12);transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:60;padding:18px;overflow:auto}
+.drawer.on{transform:none}
+.drawer h3{font-size:16px;margin-bottom:12px}
+.drawer h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);margin:16px 0 8px}
+.sw{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sw div{border-radius:6px;height:44px;display:flex;align-items:flex-end;padding:4px 6px;font-size:10px;color:#fff;font-family:'JetBrains Mono'}
+.ty div{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0}
+.st{display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="side">
+  <div class="logo">◧ ShiftOS · демо</div>
+  <a href="#">▤ Обзор</a><a href="#" class="on">▦ Расписание</a><a href="#">◷ Учёт времени</a><a href="#">▥ Табель</a><a href="#">⌁ Нагрузка</a>
+  <div class="sec">Справочники</div><a href="#">☺ Сотрудники</a><a href="#">⌂ Точки</a><a href="#">⚙ Настройки</a>
+ </aside>
+ <div class="main">
+  <div class="top">
+   <div><div class="crumb">Ресторан «Пример» · Тверская, 12</div><h1>Расписание смен</h1></div>
+   <div class="seg" id="dens"><button data-d="compact" class="on">Компактно</button><button data-d="comfy">Свободно</button></div>
+   <button class="btn" id="tok">Дизайн-основа</button>
+   <button class="btn" id="aud">Режим аудита</button>
+   <button class="btn pri">Опубликовать неделю</button>
+  </div>
+  <div class="toolbar">
+   <button class="btn">‹</button><b class="num">17-23 ноября</b><button class="btn">›</button>
+   <div class="seg"><button>День</button><button class="on">Неделя</button><button>Месяц</button></div>
+   <span class="sp"></span>
+   <span class="chip on" data-r="all">Все</span><span class="chip" data-r="kitchen"><i class="dot" style="background:var(--r-kitchen)"></i>Кухня</span><span class="chip" data-r="hall"><i class="dot" style="background:var(--r-hall)"></i>Зал</span><span class="chip" data-r="bar"><i class="dot" style="background:var(--r-bar)"></i>Бар</span>
+   <input class="search" placeholder="Поиск сотрудника" id="q">
+  </div>
+  <div class="kpis">
+   <div class="kpi"><span>Покрытие потребности</span><b class="num">92%</b><small class="down">▼ 3 смены не закрыты</small></div>
+   <div class="kpi"><span>Плановые часы</span><b class="num">486 ч</b><small class="up">▲ в пределах бюджета</small></div>
+   <div class="kpi"><span>ФОТ недели</span><b class="num">312 400 ₽</b><small class="ink-3">план 320 000 ₽</small></div>
+   <div class="kpi"><span>Конфликты</span><b class="num" style="color:var(--err)">2</b><small>переработка, пересечение</small></div>
+  </div>
+  <div class="wrapgrid" style="position:relative">
+   <span class="pin" style="left:30px;top:-6px" title="1">1</span>
+   <span class="pin" style="left:250px;top:-6px">2</span>
+   <table id="tbl"></table>
+   <span class="pin" id="pin3">3</span><span class="pin" id="pin4">4</span><span class="pin" id="pin5">5</span>
+  </div>
+  <div class="legend"><span><i class="dot" style="background:var(--r-kitchen)"></i> Кухня</span><span><i class="dot" style="background:var(--r-hall)"></i> Зал</span><span><i class="dot" style="background:var(--r-bar)"></i> Бар</span><span><i class="dot" style="background:var(--err)"></i> Конфликт</span><span>▨ Отпуск / недоступен</span><span>Данные демонстрационные</span></div>
+ </div>
+</div>
+
+<div class="audit-panel"><h3>Аудит: принципы этого экрана</h3><ol>
+ <li><i>1</i><div><b>Имя всегда видно</b>Колонка сотрудника закреплена при горизонтальной прокрутке, часы за неделю - рядом: перегруз виден без открытия карточки.</div></li>
+ <li><i>2</i><div><b>Одна главная кнопка</b>На экране один primary - «Опубликовать». Остальные действия вторичные, чтобы взгляд не прыгал.</div></li>
+ <li><i>3</i><div><b>Цвет = смысл, не украшение</b>Цвет смены только по роли (4 оттенка), красный - только ошибки. Никаких «просто красивых» цветов.</div></li>
+ <li><i>4</i><div><b>Покрытие под сеткой</b>Строка «нужно / стоит» по каждому дню: менеджер видит дыры до публикации, а не в смену.</div></li>
+ <li><i>5</i><div><b>Состояния читаются без легенды</b>Отпуск - штриховка, конфликт - красная плашка с «!», пустая ячейка - «+» по наведению.</div></li>
+ <li><i>6</i><div><b>Плотность - настройка, а не компромисс</b>«Компактно» для планирования 30+ человек, «Свободно» для планшета у шефа.</div></li>
+</ol></div>
+
+<div class="drawer" id="drawer">
+ <button class="btn" style="float:right" id="dx">Закрыть</button><h3>Дизайн-основа</h3>
+ <h4>Семантические цвета</h4><div class="sw">
+  <div style="background:#2457d6">brand</div><div style="background:#1f8a4c">ok</div><div style="background:#a86200">warn</div><div style="background:#c8322b">error</div>
+  <div style="background:#7c4dcc">кухня</div><div style="background:#2470c9">зал</div><div style="background:#c2571a">бар</div><div style="background:#3f7d5a">админ</div></div>
+ <h4>Типографика · Inter</h4><div class="ty"><div><b style="font-size:18px">Заголовок экрана</b><span class="num">18/600</span></div><div><b style="font-size:14px">Заголовок блока</b><span class="num">14/600</span></div><div><span>Основной текст</span><span class="num">13/400</span></div><div><span style="font-size:12px;color:var(--ink-3)">Вторичный</span><span class="num">12/400</span></div><div><span class="num">486 ч · 312 400 ₽</span><span class="num">цифры - моно</span></div></div>
+ <h4>Плотность</h4><div class="ty"><div><span>Компактно</span><span class="num">строка 40 · отступ 8</span></div><div><span>Свободно</span><span class="num">строка 52 · отступ 12</span></div></div>
+ <h4>Состояния ячейки</h4><div class="st"><div class="sh" style="--rc:var(--r-hall);height:38px;position:relative"><span class="t num">10:00-22:00</span></div><div class="sh conf" style="--rc:var(--r-hall);height:38px;position:relative"><span class="t num">09:00-21:00</span></div><div class="off" style="height:38px">отпуск</div></div>
+ <h4>В Figma</h4><p style="color:var(--ink-2)">Переменные: цвет, отступы, радиусы, плотность (2 режима). Компоненты с вариантами состояний. Библиотека отдельно от экранов.</p>
+</div>
+
+<script>
+const days=['Пн 17','Вт 18','Ср 19','Чт 20','Пт 21','Сб 22','Вс 23'];
+const E=[
+ ['kitchen','Шеф и кухня',[['Игорь Смирнов','Шеф-повар',['08-20','08-20','','08-20','08-20','10-22','']],['Анна Ким','Повар горячего цеха',['10-22','10-22','10-22','','','10-22','10-22']],['Руслан Ахметов','Повар холодного цеха',['','10-22','10-22','10-22','10-22','','10-22']],['Ольга Белова','Кондитер',['08-16','08-16','08-16','08-16','08-16','off','off']]]],
+ ['hall','Зал',[['Мария Орлова','Старший официант',['10-22','10-22','','','10-22','10-23','10-23']],['Дмитрий Лебедев','Официант',['','12-23','12-23','12-23','12-23!','12-23','12-23']],['София Ним','Официант',['12-23','','12-23','12-23','','12-23','']],['Артём Ершов','Хостес',['','','17-23','17-23','17-23','17-23','17-23']]]],
+ ['bar','Бар',[['Карина Волк','Бармен',['16-02','16-02','','','16-02','16-02','16-02!']],['Тимур Гусев','Бармен',['','','16-02','16-02','16-02','16-02','']]]]];
+const NEED=[7,8,8,8,9,9,8];
+function hours(s){if(!s||s==='off')return 0;const [a,b]=s.replace('!','').split('-').map(Number);return (b<=a?b+24:b)-a}
+function render(){const role=document.querySelector('.chip.on').dataset.r,q=document.getElementById('q').value.toLowerCase();
+ let h=`<thead><tr><th style="position:sticky;left:0;z-index:3">Сотрудник · часы</th>${days.map((d,i)=>`<th class="${i===3?'today':''}">${d}</th>`).join('')}</tr></thead><tbody>`;
+ const planned=[0,0,0,0,0,0,0];
+ E.forEach(([r,gname,list])=>{if(role!=='all'&&role!==r)return;const rows=list.filter(e=>e[0].toLowerCase().includes(q));if(!rows.length)return;
+  h+=`<tr class="group"><td colspan="8" style="position:sticky;left:0">${gname} · ${rows.length}</td></tr>`;
+  rows.forEach(([n,p,sh])=>{const tot=sh.reduce((a,s)=>a+hours(s),0);
+   h+=`<tr><td class="emp"><span class="h num ${tot>60?'over':''}">${tot} ч</span><b>${n}</b><span>${p}</span></td>`+sh.map((s,i)=>{
+    if(s==='off')return`<td class="cell"><div class="off">отпуск</div></td>`;if(!s)return`<td class="cell"><div class="add">+</div></td>`;
+    planned[i]++;const c=s.includes('!');const [a,b]=s.replace('!','').split('-');
+    return`<td class="cell"><div class="sh ${c?'conf':''}" style="--rc:var(--r-${r})" title="${c?'Конфликт: превышение 12 ч отдыха / пересечение':''}"><span class="t num">${a}:00-${b}:00</span><span class="p">${p}</span></div></td>`}).join('')+`</tr>`})});
+ h+=`<tr class="cov"><td class="emp"><b>Покрытие</b><span>стоит / нужно</span></td>`+NEED.map((n,i)=>{const v=planned[i],p=Math.min(100,v/n*100),c=v>=n?'var(--ok)':v>=n-1?'var(--warn)':'var(--err)';return`<td><div class="bar"><span class="num" style="color:${c};font-weight:600">${v}/${n}</span><i style="--w:${p}%;--c:${c}"></i></div></td>`}).join('')+`</tr></tbody>`;
+ document.getElementById('tbl').innerHTML=h;placePins()}
+function placePins(){const t=document.getElementById('tbl'),w=t.parentElement.getBoundingClientRect();
+ const cell=t.querySelector('.sh'),conf=t.querySelector('.sh.conf'),cov=t.querySelector('tr.cov td:nth-child(2)'),off=t.querySelector('.off');
+ const put=(id,el,dx,dy)=>{const p=document.getElementById(id);if(!el){p.style.display='none';return}p.style.display='';const r=el.getBoundingClientRect();p.style.left=(r.left-w.left+t.parentElement.scrollLeft+dx)+'px';p.style.top=(r.top-w.top+dy)+'px'};
+ put('pin3',cell,-10,-10);put('pin4',cov,-10,-10);put('pin5',conf||off,-10,-10)}
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));render()});
+document.getElementById('q').oninput=render;
+document.querySelectorAll('#dens button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#dens button').forEach(x=>x.classList.toggle('on',x===b));document.body.classList.toggle('comfy',b.dataset.d==='comfy');placePins()});
+document.getElementById('aud').onclick=()=>{document.body.classList.toggle('audit');placePins()};
+document.getElementById('tok').onclick=()=>document.getElementById('drawer').classList.add('on');document.getElementById('dx').onclick=()=>document.getElementById('drawer').classList.remove('on');
+addEventListener('resize',placePins);render();
+</script>
+</body>
+</html>
